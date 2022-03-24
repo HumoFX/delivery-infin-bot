@@ -25,7 +25,9 @@ async def update_application(app_id, **kwargs):
     """
     # hea
     headers = image_headers
-    return await post_data(url=f'{baseUrl}/card-delivery/courier/info/{app_id}', headers=headers, **kwargs)
+    token = "eyJraWQiOiIvcHJpdmF0ZWtleS5wZW0iLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJpbmZpbmJhbmsiLCJqdGkiOiJpbmZpbjdiNTM1OGYwLTBkNjMtNGVhMS1hOTM2LThmYjZiNTZkYzlkZiIsInN1YiI6IjE5OTgyMiIsImN1c3RvbWVySUQiOiIxOTk4MjIiLCJncm91cHMiOlsiTk9OX0NMSUVOVCJdLCJhdWQiOiJ1c2luZy1qd3QiLCJleHAiOjE2NTQxMDY3MzQsImlhdCI6MTY0ODEwNjczNCwiYXV0aF90aW1lIjoxNjQ4MTA2NzM0fQ.pfiqQy2BfOnzFdWbEveSC9W49khMk8jRRrgUjiv8ddwrfHtOBDXuCavo-ulvlM2iRBYBO-AchFRx8LbmEsFJSu3stq7ERgyKP13y3RIwJ1Q1rr-BYYuz2295M547bpq2_EAnMRQM0XNNPc_EmNJKJG6kOhPLBuNVdUO69ElB0OhU9UhjyinMrWFzrv7j3lqF3D0KtE8jTg4-ViT0ytDs4_vaz2vJ2KwMULO4_LJXDgQP7dVfZJ2su8sjqifQE6pV4wYsKhEPdEMA25mjWpw8wtGDYDIWC8YwIrrPDd6wAJmol-4ciResluVh0UxesKOPZrQ4ttGMv6Fb3X8zYkKLAg"
+    headers['Authorization'] = f'Bearer {token}'
+    return await post_data(url=f'{baseUrl}/card-delivery/application/save/photos/{app_id}', headers=headers, **kwargs)
 
 
 # create class Customer with kwargs of name, surname, patronymic, phone_number fields

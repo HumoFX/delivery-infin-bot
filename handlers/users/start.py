@@ -127,7 +127,7 @@ async def next_handler(call: types.CallbackQuery, state: FSMContext):
         resp = await update_application(app_id=data.get('deep_link'), app_file_first=io.BytesIO(app.app_file_first),
                                         app_file_second=io.BytesIO(app.app_file_second), app_name=app.app_name)
         if resp.get('data'):
-            await call.message.edit_text(resp.get('data'), reply_markup=None)
+            await call.message.edit_text("*Заявка успешно завершена!*", reply_markup=None, parse_mode='Markdown')
         else:
             await call.message.edit_text(resp.get('errorMessage'), reply_markup=None)
         await state.finish()
