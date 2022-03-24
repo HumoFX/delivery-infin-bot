@@ -4,3 +4,6 @@ logging.basicConfig(format=u'%(filename)s [LINE:%(lineno)d] #%(levelname)-8s [%(
                     level=logging.INFO,
                     # level=logging.DEBUG,  # Можно заменить на другой уровень логгирования.
                     )
+# Logger for Handling all errors
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)

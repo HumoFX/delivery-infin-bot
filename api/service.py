@@ -1,0 +1,117 @@
+import json
+
+from aiohttp import FormData
+from datetime import datetime
+from .constants import *
+from .request import send_get_request, post_request, post_, post_data
+import textwrap
+
+
+async def get_application(app_id):
+    """
+    Получение данных о приложении
+    :param app_id: ID приложения
+    :return: ответ сервера
+    """
+    return await send_get_request(url=f'{baseUrl}/card-delivery/courier/info/{app_id}', lang='ru')
+
+
+async def update_application(app_id, **kwargs):
+    """
+    Обновление данных о приложении
+    :param app_id: ID приложения
+    :param data: данные для обновления
+    :return: ответ сервера
+    """
+    # hea
+    headers = image_headers
+    return await post_data(url=f'{baseUrl}/card-delivery/courier/info/{app_id}', headers=headers, **kwargs)
+
+
+# create class Customer with kwargs of name, surname, patronymic, phone_number fields
+class Customer:
+    def __init__(self, **kwargs):
+        self.phone_number = kwargs.get('phoneNumber')
+
+    def __str__(self):
+        return f'*Телефон:* {self.phone_number}'
+
+
+# create class Passport with kwargs of name, lastname, patronymic, series, number, issued_by, date_of_issue,  birth_date, birth_place fields
+class Passport:
+    def __init__(self, **kwargs):
+        self.name = kwargs.get('name')
+        self.lastname = kwargs.get('lastName')
+        self.patronymic = kwargs.get('patronymic')
+        self.series = kwargs.get('passportSerial')
+        self.number = kwargs.get('passportNumber')
+        self.birth_place = kwargs.get('birthPlace')
+        self.date_of_issue = datetime.fromtimestamp(kwargs.get('dateOfIssue')/1000).date().strftime('%d.%m.%Y')
+        self.date_of_expiry = datetime.fromtimestamp(kwargs.get('dateOfExpiry')/1000).date().strftime('%d.%m.%Y')
+        self.date_of_birth = kwargs.get('dateOfBirth')
+        self.issued_by = kwargs.get('issuedBy')
+        self.inn = kwargs.get('inn')
+
+    def __str__(self):
+        return f"""
+        *ФИО:*{self.lastname} {self.name} {self.patronymic}
+        *Серия и номер:* {self.series} {self.number}
+        *Дата рождения:* {self.date_of_birth}
+        *Место рождения:* {self.birth_place}
+        *Дата выдачи:* {self.date_of_issue}
+        *Дата окончания:* {self.date_of_expiry}
+        *Кем выдан:* {self.issued_by}
+        *ИНН:* {self.inn}
+        """
+
+
+# create class Address with kwargs of region, city, district, street, house, flat, comment fields
+class Address:
+    def __init__(self, **kwargs):
+        self.region = kwargs.get('region', '')
+        self.city = kwargs.get('city', '')
+        self.district = kwargs.get('district', '')
+        self.street = kwargs.get('street', '')
+        self.house = kwargs.get('house', '')
+        self.flat = kwargs.get('flat', '')
+        self.comment = kwargs.get('comment', '')
+
+    def __str__(self):
+        return f"""
+        *Регион:* {self.region}
+        *Город:* {self.city}
+        *Район:* {self.district}
+        *Улица:* {self.street}
+        *Дом:* {self.house}
+        *Квартира:* {self.flat}
+        *Комментарий:* {self.comment}
+        """
+
+
+# create class Delivery with kwargs of customer, passport, address fields
+class Delivery:
+    def __init__(self, **kwargs):
+        self.customer = Customer(**kwargs.get('customerData'))
+        self.passport = Passport(**kwargs.get('passportDataEntity'))
+        self.address = Address(**kwargs.get('address', {}))
+
+    def __str__(self):
+        return f"""
+        {self.customer}
+        {self.passport}
+        {self.address}
+        """
+
+
+# create class Application with kwargs of id, data fields
+class Application:
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id')
+        self.data = Delivery(**kwargs.get('data'))
+
+    def __str__(self):
+        text = f"""
+        *Заявка:* {self.id}
+        {self.data}
+        """
+        return textwrap.dedent(text)
