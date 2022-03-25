@@ -56,15 +56,19 @@ async def contact_handler(message: types.Message, state: FSMContext):
                            first_name=message.from_user.first_name, last_name=message.from_user.last_name)
     await message.answer("Вы авторизованы", reply_markup=types.ReplyKeyboardRemove())
     if data.get('deep_link'):
+        deep_link = data.get('deep_link')
+        print(deep_link)
         await state.update_data(deep_link=deep_link)
         resp = await get_application(deep_link)
         if resp and resp.get('data'):
             application = Application(id=deep_link, data=resp.get('data'))
             await message.answer(application, reply_markup=inline_user_keyboard(), parse_mode='Markdown')
+            await state.finish()
             await ProcessApp.application.set()
+
         else:
             await message.answer("Заявка не найдена")
-    await state.finish()
+            await state.finish()
 
 
 @dp.message_handler(content_types=ContentTypes.PHOTO, state=[ProcessApp.first_photo, ProcessApp.second_photo])
@@ -117,6 +121,7 @@ async def close_handler(call: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(lambda call: call.data == 'next', state=[ProcessApp.application, ProcessApp.confirm])
 async def next_handler(call: types.CallbackQuery, state: FSMContext):
     current_state = await state.get_state()
+    print(current_state)
     data = await state.get_data()
     if current_state == ProcessApp.application.state:
         message = await call.message.edit_text("Отправьте первую фотку", reply_markup=close_inline_user_keyboard())
