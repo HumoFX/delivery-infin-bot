@@ -57,7 +57,6 @@ async def contact_handler(message: types.Message, state: FSMContext):
     await message.answer("Вы авторизованы", reply_markup=types.ReplyKeyboardRemove())
     if data.get('deep_link'):
         deep_link = data.get('deep_link')
-        print(deep_link)
         await state.update_data(deep_link=deep_link)
         resp = await get_application(deep_link)
         if resp and resp.get('data'):
@@ -121,7 +120,6 @@ async def close_handler(call: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(lambda call: call.data == 'next', state=[ProcessApp.application, ProcessApp.confirm])
 async def next_handler(call: types.CallbackQuery, state: FSMContext):
     current_state = await state.get_state()
-    print(current_state)
     data = await state.get_data()
     if current_state == ProcessApp.application.state:
         message = await call.message.edit_text("Отправьте первую фотку", reply_markup=close_inline_user_keyboard())
