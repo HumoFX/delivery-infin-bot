@@ -30,7 +30,7 @@ async def bot_start(message: types.Message, state: FSMContext):
         await Registration.contact.set()
         if deep_link:
             await state.update_data(deep_link=deep_link)
-        await message.answer("Отправьте номер телефона", reply_markup=contact())
+        await message.answer("Отправить номер телефона в формате 998901234567", reply_markup=contact())
     else:
         if deep_link:
             await state.update_data(deep_link=deep_link)
