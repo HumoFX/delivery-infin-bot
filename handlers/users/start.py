@@ -8,7 +8,7 @@ from loader import dp, bot
 from utils.db_api.crud import get_user
 from utils.db_api.models import Users, Application as App
 from keyboards.default.user import contact
-from keyboards.inline.user import inline_user_keyboard, close_inline_user_keyboard
+from keyboards.inline.user import inline_user_keyboard, close_inline_user_keyboard, inline_end_keyboard
 from sqlalchemy import or_, and_
 # from texts.user_text import REGISTRATION as TXT
 from states.user import Registration, ProcessApp
