@@ -8,6 +8,13 @@ def inline_user_keyboard():
     return keyboard
 
 
+def inline_end_keyboard():
+    keyboard = InlineKeyboardMarkup(row_width=2)
+    keyboard.insert(InlineKeyboardButton("Завершить", callback_data="next"))
+    keyboard.insert(InlineKeyboardButton("Отмена", callback_data="close"))
+    return keyboard
+
+
 def close_inline_user_keyboard():
     keyboard = InlineKeyboardMarkup(row_width=1)
     keyboard.add(InlineKeyboardButton("Отмена", callback_data="close"))
