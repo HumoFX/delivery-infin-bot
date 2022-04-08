@@ -10,8 +10,8 @@ def inline_user_keyboard():
 
 def inline_end_keyboard():
     keyboard = InlineKeyboardMarkup(row_width=2)
-    keyboard.insert(InlineKeyboardButton("Завершить", callback_data="next"))
     keyboard.insert(InlineKeyboardButton("Отмена", callback_data="close"))
+    keyboard.insert(InlineKeyboardButton("Завершить", callback_data="next"))
     return keyboard
 
 
