@@ -84,8 +84,11 @@ async def photo_handler(message: types.Message, state: FSMContext):
         if current_state == ProcessApp.first_photo.state:
             await app.update(app_file_first=downloaded.read(), app_updated_date=date).apply()
             if data.get('message_id'):
-                await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=data.get('message_id'),
-                                                    reply_markup=None)
+                try:
+                    await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=data.get('message_id'),
+                                                        reply_markup=None)
+                except Exception as e:
+                    print(e)
             message = await message.answer("Отправьте второе фото", reply_markup=close_inline_user_keyboard())
             await state.update_data(message_id=message.message_id)
             await ProcessApp.second_photo.set()
@@ -94,7 +97,7 @@ async def photo_handler(message: types.Message, state: FSMContext):
             if data.get('message_id'):
                 await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=data.get('message_id'),
                                                     reply_markup=None)
-            message = await message.answer("*Завершите заявку*", reply_markup=inline_end_keyboard(),
+            message = await message.answer("Завершите заявку", reply_markup=inline_end_keyboard(),
                                            parse_mode='Markdown')
             await state.update_data(message_id=message.message_id)
             await ProcessApp.confirm.set()
