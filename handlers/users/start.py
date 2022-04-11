@@ -100,7 +100,7 @@ async def photo_handler(message: types.Message, state: FSMContext):
                                                         reply_markup=None)
                 except Exception as e:
                     print(e)
-            message = await message.answer("Завершите заявку", reply_markup=inline_end_keyboard(),
+            message = await message.answer("Завершите доставку", reply_markup=inline_end_keyboard(),
                                            parse_mode='Markdown')
             await state.update_data(message_id=message.message_id)
             await ProcessApp.confirm.set()
@@ -141,5 +141,3 @@ async def next_handler(call: types.CallbackQuery, state: FSMContext):
         else:
             await call.message.edit_text(resp.get('errorMessage'), reply_markup=None)
         await state.finish()
-
-
