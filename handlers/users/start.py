@@ -21,7 +21,7 @@ import textwrap
 # from keyboards.constants import LANGUAGES, NAVIGATION
 
 
-@dp.message_handler(CommandStart())
+@dp.message_handler(commands='start', state='*')
 async def bot_start(message: types.Message, state: FSMContext):
     await state.reset_state()
     user = await get_user()
