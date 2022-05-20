@@ -93,27 +93,50 @@ class Address:
 # create class Delivery with kwargs of customer, passport, address fields
 class Delivery:
     def __init__(self, **kwargs):
-        self.customer = Customer(**kwargs.get('customerData'))
-        self.passport = Passport(**kwargs.get('passportDataEntity'))
-        self.address = Address(**kwargs.get('address', {}))
+        # self.customer = Customer(**kwargs.get('customerData'))
+        # self.passport = Passport(**kwargs.get('passportDataEntity'))
+        # self.address = Address(**kwargs.get('address', {}))
+        self.application_id = kwargs.get('applicationId', '')
+        self.card_type = kwargs.get('cardType', '')
+        self.phone_number = kwargs.get('phoneNumber', '')
+        self.full_name = kwargs.get('fullName', '')
+        self.passport = kwargs.get('passport', '')
+        self.date_of_birth = kwargs.get('dateOfBirth', '')
+        self.region = kwargs.get('region', '')
+        self.city = kwargs.get('city', '')
+        self.district = kwargs.get('district', '')
+        self.street = kwargs.get('street', '')
+        self.house = kwargs.get('house', '')
+        self.flat = kwargs.get('flat', '')
+        self.comment = kwargs.get('comment', '')
 
     def __str__(self):
         return f"""
-        {self.customer}
-        {self.passport}
-        {self.address}
+        *Номер заявки:* {self.application_id}
+        *Тип карты:* {self.card_type}
+        
+        *Номер телефона:* {self.phone_number}
+        *ФИО:* {self.full_name}
+        *Паспорт:* {self.passport}
+        *Дата рождения:* {self.date_of_birth}
+        *Регион:* {self.region}
+        *Город:* {self.city}
+        *Район:* {self.district}
+        *Улица:* {self.street}
+        *Дом:* {self.house}
+        *Квартира:* {self.flat}
+        
+        *Комментарий:* {self.comment}
         """
 
 
 # create class Application with kwargs of id, data fields
 class Application:
     def __init__(self, **kwargs):
-        self.id = kwargs.get('id')
         self.data = Delivery(**kwargs.get('data'))
 
     def __str__(self):
         text = f"""
-        *Заявка:* {self.id}
         {self.data}
         """
         return textwrap.dedent(text)
