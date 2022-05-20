@@ -26,7 +26,6 @@ async def bot_start(message: types.Message, state: FSMContext):
     await state.reset_state()
     user = await get_user()
     print(user)
-    print(user.contact)
     print(await state.get_state())
     deep_link = message.get_args()
     if not user:
