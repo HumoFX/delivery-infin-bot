@@ -36,7 +36,7 @@ async def bot_start(message: types.Message, state: FSMContext):
             await state.update_data(deep_link=deep_link)
             resp = await get_application(deep_link)
             if resp and resp.get('data'):
-                application = Application(id=deep_link, data=resp.get('data'))
+                application = Application(data=resp.get('data'))
                 await message.answer(application, reply_markup=inline_user_keyboard(), parse_mode='Markdown')
                 await ProcessApp.application.set()
             else:
@@ -60,7 +60,7 @@ async def contact_handler(message: types.Message, state: FSMContext):
         await state.update_data(deep_link=deep_link)
         resp = await get_application(deep_link)
         if resp and resp.get('data'):
-            application = Application(id=deep_link, data=resp.get('data'))
+            application = Application(data=resp.get('data'))
             await message.answer(application, reply_markup=inline_user_keyboard(), parse_mode='Markdown')
             await state.finish()
             await ProcessApp.application.set()
