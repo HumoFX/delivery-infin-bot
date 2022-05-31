@@ -62,8 +62,13 @@ async def contact_handler(message: types.Message, state: FSMContext):
         await state.update_data(deep_link=deep_link)
         resp = await get_application(deep_link)
         if resp and resp.get('data'):
+            data['application'] = resp.get('data')
             application = Application(data=resp.get('data'))
-            await message.answer(application, reply_markup=inline_user_keyboard(), parse_mode='Markdown')
+            await state.update_data(data=data)
+            if application.data.status == "COURIER":
+                await message.answer(application, reply_markup=inline_user_keyboard(), parse_mode='Markdown')
+            else:
+                await message.answer(application, reply_markup=close_inline_user_keyboard(), parse_mode='Markdown')
             await state.finish()
             await ProcessApp.application.set()
 
@@ -131,7 +136,7 @@ async def next_handler(call: types.CallbackQuery, state: FSMContext):
     current_state = await state.get_state()
     data = await state.get_data()
     if current_state == ProcessApp.application.state:
-        message = await call.message.edit_text("Отправьте первую фотку", reply_markup=close_inline_user_keyboard())
+        message = await call.message.edit_text("Отправьте первое фото", reply_markup=close_inline_user_keyboard())
         await state.update_data(message_id=message.message_id)
         await ProcessApp.first_photo.set()
     elif current_state == ProcessApp.confirm.state:

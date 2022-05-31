@@ -10,3 +10,7 @@ class ProcessApp(StatesGroup):
     first_photo = State()
     second_photo = State()
     confirm = State()
+
+
+class ProcessGen(StatesGroup):
+    photo = State()

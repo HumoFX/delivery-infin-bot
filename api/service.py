@@ -48,8 +48,8 @@ class Passport:
         self.series = kwargs.get('passportSerial')
         self.number = kwargs.get('passportNumber')
         self.birth_place = kwargs.get('birthPlace')
-        self.date_of_issue = datetime.fromtimestamp(kwargs.get('dateOfIssue')/1000).date().strftime('%d.%m.%Y')
-        self.date_of_expiry = datetime.fromtimestamp(kwargs.get('dateOfExpiry')/1000).date().strftime('%d.%m.%Y')
+        self.date_of_issue = datetime.fromtimestamp(kwargs.get('dateOfIssue') / 1000).date().strftime('%d.%m.%Y')
+        self.date_of_expiry = datetime.fromtimestamp(kwargs.get('dateOfExpiry') / 1000).date().strftime('%d.%m.%Y')
         self.date_of_birth = kwargs.get('dateOfBirth')
         self.issued_by = kwargs.get('issuedBy')
         self.inn = kwargs.get('inn')
@@ -90,6 +90,21 @@ class Address:
         """
 
 
+STATUS = {
+    "APPROVED": "Подтвержден",
+    "CANCELLED_BY_CRM": "Отклонен срм",
+    "CARD_ISSUED": "Карта выдана",
+    "COMPLETED": "Завершено",
+    "COURIER": "Передан курьеру",
+    "HISTORY": "История",
+    "NON_COMPLETE": "Не заполнено",
+    "PENDING": "Ожидает подтверждения",
+    "REJECTED": "Отклонен",
+    "UNDERWRITER": "Возвращен на доработку",
+    "VISIT_BANK": "Посетить банк",
+}
+
+
 # create class Delivery with kwargs of customer, passport, address fields
 class Delivery:
     def __init__(self, **kwargs):
@@ -109,11 +124,13 @@ class Delivery:
         self.house = kwargs.get('house', '')
         self.flat = kwargs.get('flat', '')
         self.comment = kwargs.get('comment', '')
+        self.status = kwargs.get('status', '')
 
     def __str__(self):
         return f"""
         *Номер заявки:* {self.application_id}
         *Тип карты:* {self.card_type}
+        *Статус:* {STATUS[self.status]}
         
         *Номер телефона:* {self.phone_number}
         *ФИО:* {self.full_name}
