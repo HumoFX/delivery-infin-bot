@@ -133,14 +133,16 @@ async def photo_handler(message: types.Message, state: FSMContext):
         await ProcessApp.second_photo.set()
 
 
-@dp.callback_query_handler(lambda call: call.data == 'close', state='*')
-async def close_handler(call: types.CallbackQuery, state: FSMContext):
-    await call.message.edit_text("Заявка закрыта")
-    # await call.message.edit_reply_markup(reply_markup=types.ReplyKeyboardRemove())
-    await state.finish()
+# @dp.callback_query_handler(ApplicationCB.action.filter(), state='*')
+# async def close_handler(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
+#     action = callback_data.get('action')
+#     if action
+#     await call.message.edit_text("Заявка закрыта")
+#     # await call.message.edit_reply_markup(reply_markup=types.ReplyKeyboardRemove())
+#     await state.finish()
 
 
-@dp.callback_query_handler(ApplicationCB.action.filter(), state=[ProcessApp.application, ProcessApp.confirm])
+@dp.callback_query_handler(ApplicationCB.action.filter(), state='*')
 async def next_handler(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     current_state = await state.get_state()
     data = await state.get_data()
@@ -169,7 +171,7 @@ async def next_handler(call: types.CallbackQuery, callback_data: dict, state: FS
                 else:
                     await call.message.edit_text(resp.get('errorMessage'), reply_markup=None)
                 await state.finish()
-    if action == 'close':
+    elif action == 'close':
         await call.message.edit_text("Заявка закрыта")
         # await call.message.edit_reply_markup(reply_markup=types.ReplyKeyboardRemove())
         await state.finish()
