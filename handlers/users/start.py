@@ -172,6 +172,6 @@ async def next_handler(call: types.CallbackQuery, callback_data: dict, state: FS
                     await call.message.edit_text(resp.get('errorMessage'), reply_markup=None)
                 await state.finish()
     elif action == 'close':
-        await call.message.edit_text("Заявка закрыта")
+        await call.message.delete()
         # await call.message.edit_reply_markup(reply_markup=types.ReplyKeyboardRemove())
         await state.finish()

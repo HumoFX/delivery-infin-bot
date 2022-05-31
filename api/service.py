@@ -93,7 +93,7 @@ class Address:
 STATUS = {
     "APPROVED": "Подтвержден",
     "CANCELLED_BY_CRM": "Отклонен срм",
-    "CARD_ISSUED": "Карта выдана",
+    "CARD_ISSUED": "Карта выпущена",
     "COMPLETED": "Завершено",
     "COURIER": "Передан курьеру",
     "HISTORY": "История",
