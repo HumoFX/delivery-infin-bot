@@ -1,3 +1,5 @@
+import re
+
 from aiogram import types
 from aiogram.dispatcher.filters.builtin import CommandStart
 from aiogram.types import Message, ContentTypes
@@ -87,7 +89,39 @@ async def contact_handler(message: types.Message, state: FSMContext):
             await state.finish()
 
 
-@dp.message_handler(content_types=ContentTypes.PHOTO, state=[ProcessApp.first_photo, ProcessApp.second_photo])
+@dp.message_handler(state='*', content_types=ContentTypes.TEXT)
+async def text_handler(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    user = await get_user()
+
+    if user:
+        if re.match("^[A-Za-z0-9]*$", message.text):
+            deep_link = message.text
+            await state.update_data(deep_link=deep_link)
+            resp = await get_application(deep_link)
+            if resp and resp.get('data'):
+                data['application'] = resp.get('data')
+                application = Application(data=resp.get('data'))
+                await state.update_data(data=data)
+                if application.data.status == "COURIER":
+                    await message.answer(application.__str__(), reply_markup=inline_user_keyboard(deep_link),
+                                         parse_mode='Markdown')
+                else:
+                    await message.answer(application.__str__(), reply_markup=close_inline_user_keyboard(deep_link),
+                                         parse_mode='Markdown')
+                await state.finish()
+                await ProcessApp.application.set()
+
+            else:
+                await message.answer("Заявка не найдена")
+                await state.finish()
+    elif not user:
+        await Registration.contact.set()
+        await state.update_data(deep_link=message.text)
+        await message.answer("Отправить номер телефона в формате 998901234567", reply_markup=contact())
+
+
+@dp.message_handler(content_types=ContentTypes.PHOTO, state='*')
 async def photo_handler(message: types.Message, state: FSMContext):
     data = await state.get_data()
     current_state = await state.get_state()
@@ -95,42 +129,44 @@ async def photo_handler(message: types.Message, state: FSMContext):
     app_id = data.get('deep_link')
     app = await App.query.where(and_(App.app_name == app_id, App.app_finished == False)).gino.first()
     downloaded = await bot.download_file(file['file_path'])
-
-    date = datetime.datetime.now()
-    if app:
-        if current_state == ProcessApp.first_photo.state:
-            await app.update(app_file_first=downloaded.read(), app_updated_date=date).apply()
+    if current_state in [ProcessApp.first_photo.state, ProcessApp.second_photo.state]:
+        date = datetime.datetime.now()
+        if app:
+            if current_state == ProcessApp.first_photo.state:
+                await app.update(app_file_first=downloaded.read(), app_updated_date=date).apply()
+                if data.get('message_id'):
+                    try:
+                        await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=data.get('message_id'),
+                                                            reply_markup=None)
+                    except Exception as e:
+                        print(e)
+                message = await message.answer("Отправьте второе фото", reply_markup=close_inline_user_keyboard(app_id))
+                await state.update_data(message_id=message.message_id)
+                await ProcessApp.second_photo.set()
+            elif current_state == ProcessApp.second_photo.state:
+                await app.update(app_file_second=downloaded.read(), app_updated_date=date).apply()
+                if data.get('message_id'):
+                    try:
+                        await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=data.get('message_id'),
+                                                            reply_markup=None)
+                    except Exception as e:
+                        print(e)
+                message = await message.answer("Завершите доставку", reply_markup=inline_end_keyboard(app_id),
+                                               parse_mode='Markdown')
+                await state.update_data(message_id=message.message_id)
+                await ProcessApp.confirm.set()
+        else:
+            await App.create(app_name=app_id, app_owner=message.from_user.id, app_file_first=downloaded.read(),
+                             app_status='200', app_created_date=date, app_updated_date=date)
             if data.get('message_id'):
-                try:
-                    await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=data.get('message_id'),
-                                                        reply_markup=None)
-                except Exception as e:
-                    print(e)
+                await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=data.get('message_id'),
+                                                    reply_markup=None)
+
             message = await message.answer("Отправьте второе фото", reply_markup=close_inline_user_keyboard(app_id))
             await state.update_data(message_id=message.message_id)
             await ProcessApp.second_photo.set()
-        elif current_state == ProcessApp.second_photo.state:
-            await app.update(app_file_second=downloaded.read(), app_updated_date=date).apply()
-            if data.get('message_id'):
-                try:
-                    await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=data.get('message_id'),
-                                                        reply_markup=None)
-                except Exception as e:
-                    print(e)
-            message = await message.answer("Завершите доставку", reply_markup=inline_end_keyboard(app_id),
-                                           parse_mode='Markdown')
-            await state.update_data(message_id=message.message_id)
-            await ProcessApp.confirm.set()
     else:
-        await App.create(app_name=app_id, app_owner=message.from_user.id, app_file_first=downloaded.read(),
-                         app_status='200', app_created_date=date, app_updated_date=date)
-        if data.get('message_id'):
-            await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=data.get('message_id'),
-                                                reply_markup=None)
-
-        message = await message.answer("Отправьте второе фото", reply_markup=close_inline_user_keyboard(app_id))
-        await state.update_data(message_id=message.message_id)
-        await ProcessApp.second_photo.set()
+        await message.answer("Вы не можете прикрепить фото для данной заявки")
 
 
 # @dp.callback_query_handler(ApplicationCB.action.filter(), state='*')

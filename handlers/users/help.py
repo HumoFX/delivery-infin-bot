@@ -6,9 +6,11 @@ from loader import dp
 
 @dp.message_handler(CommandHelp())
 async def bot_help(message: types.Message):
-    text = ("Список команд: ",
-            "/start - Начать диалог",
-            "/help - Получить справку")
+    text = """Инструкция по использованию бота:\n
+    Сканируйте qr код, который направит вас на этот бот.\n
+    Нажмите на /start для начала работы.\n
+    Если qr валидный, то получите информацию о заявке.\n
+    """
 
     await message.answer("\n".join(text))
 
