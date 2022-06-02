@@ -61,7 +61,7 @@ async def contact_handler(message: types.Message, state: FSMContext):
     user = await get_user()
     if user:
         user.contact = message.contact
-        await user.update()
+        user.update()
     else:
         await Users.create(user_id=message.from_user.id, contact=message.contact.phone_number,
                            username=message.from_user.username,
@@ -166,7 +166,7 @@ async def photo_handler(message: types.Message, state: FSMContext):
             await state.update_data(message_id=message.message_id)
             await ProcessApp.second_photo.set()
     else:
-        await message.answer("Вы не можете прикрепить фото для данной заявки")
+        await message.answer("Прикрепление фото не возможно")
 
 
 # @dp.callback_query_handler(ApplicationCB.action.filter(), state='*')
@@ -202,6 +202,10 @@ async def next_handler(call: types.CallbackQuery, callback_data: dict, state: FS
                                                 app_file_first=io.BytesIO(app.app_file_first),
                                                 app_file_second=io.BytesIO(app.app_file_second), app_name=app.app_name)
                 if resp.get('data'):
+                    apps = await MyApp.query.where(and_(MyApp.app_id == data.get('deep_link'), MyApp.finished == False)).gino.all()
+                    for app in apps:
+                        await app.update(finished=True).apply()
+
                     await call.message.edit_text("*Заявка успешно завершена!*", reply_markup=None,
                                                  parse_mode='Markdown')
                 else:

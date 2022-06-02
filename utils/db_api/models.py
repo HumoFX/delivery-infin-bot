@@ -40,3 +40,13 @@ class Log(db.Model):
     request = Column(JSON, nullable=True)
     response = Column(JSON, nullable=True)
     created_at = Column(TIMESTAMP, default=datetime.now())
+
+
+class MyApp(db.Model):
+    __tablename__ = "my_app"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("users.user_id"))
+    app_id = Column(String(10))
+    app_url = Column(String(128), nullable=True)
+    finished = Column(Boolean, default=False)
+    created_at = Column(TIMESTAMP, default=datetime.now())

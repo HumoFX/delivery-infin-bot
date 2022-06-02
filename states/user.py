@@ -12,5 +12,9 @@ class ProcessApp(StatesGroup):
     confirm = State()
 
 
+class ProcessScan(StatesGroup):
+    photo = State()
+
+
 class ProcessGen(StatesGroup):
     photo = State()
