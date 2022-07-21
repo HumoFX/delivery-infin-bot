@@ -16,6 +16,7 @@ async def send_get_request(url, lang, **kwargs):
         try:
             async with session.get(url, headers=auth_header, params=kwargs) as response:
                 data = await response.json()
+                print(dict(data))
                 return data
         except Exception as err:
             logger.exception(err)

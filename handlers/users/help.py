@@ -18,13 +18,15 @@ from ..qr_extractor import *
 from keyboards.default.user import myapps
 
 
-@dp.message_handler(CommandHelp())
+@dp.message_handler(commands='help', state='*')
 async def bot_help(message: types.Message):
     text = (
         "/start - начать работу\n",
         "/help - помощь\n",
         "/scan - отсканировать qr коды\n",
         "/myapps - показать все приложения\n",
+        "/app_list - Показать список 'К принятию'\n",
+        "/delivery_list - Показать список 'К доставке'\n",
     )
     await message.answer("\n".join(text))
 

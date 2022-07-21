@@ -13,6 +13,10 @@ class Users(db.Model):
     first_name = Column(String(64))
     last_name = Column(String(64))
     contact = Column(String(64))
+    crm_id = Column(String(64))
+    is_admin = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
+    is_courier = Column(Boolean, default=False)
 
 
 class Application(db.Model):
@@ -20,12 +24,18 @@ class Application(db.Model):
     app_id = Column(BigInteger, primary_key=True)
     app_name = Column(String(64))
     app_file_first = Column(LargeBinary, nullable=True)
+    app_file_first_id = Column(String(256), nullable=True)
     app_file_second = Column(LargeBinary, nullable=True)
+    app_file_second_id = Column(String(256), nullable=True)
     app_status = Column(String(64))
     app_owner = Column(BigInteger)
     app_created_date = Column(DateTime)
     app_updated_date = Column(DateTime)
     app_finished = Column(Boolean, default=False)
+    check_start_date = Column(DateTime)
+    check_end_date = Column(DateTime)
+    checked_by = Column(BigInteger, nullable=True)
+    status = Column(String(64))
 
 
 class Log(db.Model):

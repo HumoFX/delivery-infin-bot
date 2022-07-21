@@ -11,11 +11,13 @@ from loader import dp, bot
 from utils.db_api.crud import get_user
 from utils.db_api.models import Users, Application as App
 from keyboards.default.user import contact
-from keyboards.inline.user import inline_user_keyboard, close_inline_user_keyboard, inline_end_keyboard
+from keyboards.inline.user import inline_user_keyboard, close_inline_user_keyboard, inline_end_keyboard, \
+    inline_approve_in_group_keyboard
 from sqlalchemy import or_, and_
 # from texts.user_text import REGISTRATION as TXT
 from states.user import Registration, ProcessApp
 from api.service import *
+from data import config
 import io
 import datetime
 import textwrap
@@ -107,9 +109,11 @@ async def text_handler(message: types.Message, state: FSMContext):
                     await message.answer(application.__str__(), reply_markup=inline_user_keyboard(deep_link),
                                          parse_mode='Markdown')
                 else:
-                    await message.answer(application.__str__(), reply_markup=close_inline_user_keyboard(deep_link),
+                    # await message.answer(application.__str__(), reply_markup=close_inline_user_keyboard(deep_link),
+                    #                      parse_mode='Markdown')
+                    await message.answer(application.__str__(), reply_markup=inline_user_keyboard(deep_link),
                                          parse_mode='Markdown')
-                await state.finish()
+                # await state.finish()
                 await ProcessApp.application.set()
 
             else:
@@ -133,7 +137,8 @@ async def photo_handler(message: types.Message, state: FSMContext):
         date = datetime.datetime.now()
         if app:
             if current_state == ProcessApp.first_photo.state:
-                await app.update(app_file_first=downloaded.read(), app_updated_date=date).apply()
+                await app.update(app_file_first=downloaded.read(), app_updated_date=date,
+                                 app_file_first_id=message.photo[-1].file_id).apply()
                 if data.get('message_id'):
                     try:
                         await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=data.get('message_id'),
@@ -144,7 +149,8 @@ async def photo_handler(message: types.Message, state: FSMContext):
                 await state.update_data(message_id=message.message_id)
                 await ProcessApp.second_photo.set()
             elif current_state == ProcessApp.second_photo.state:
-                await app.update(app_file_second=downloaded.read(), app_updated_date=date).apply()
+                await app.update(app_file_second=downloaded.read(), app_updated_date=date,
+                                 app_file_second_id=message.photo[-1].file_id).apply()
                 if data.get('message_id'):
                     try:
                         await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=data.get('message_id'),
@@ -157,7 +163,8 @@ async def photo_handler(message: types.Message, state: FSMContext):
                 await ProcessApp.confirm.set()
         else:
             await App.create(app_name=app_id, app_owner=message.from_user.id, app_file_first=downloaded.read(),
-                             app_status='200', app_created_date=date, app_updated_date=date)
+                             app_status='200', app_created_date=date, app_updated_date=date,
+                             app_file_first_id=message.photo[-1].file_id)
             if data.get('message_id'):
                 await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=data.get('message_id'),
                                                     reply_markup=None)
@@ -169,15 +176,6 @@ async def photo_handler(message: types.Message, state: FSMContext):
         await message.answer("Прикрепление фото не возможно")
 
 
-# @dp.callback_query_handler(ApplicationCB.action.filter(), state='*')
-# async def close_handler(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
-#     action = callback_data.get('action')
-#     if action
-#     await call.message.edit_text("Заявка закрыта")
-#     # await call.message.edit_reply_markup(reply_markup=types.ReplyKeyboardRemove())
-#     await state.finish()
-
-
 @dp.callback_query_handler(ApplicationCB.action.filter(), state='*')
 async def next_handler(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     current_state = await state.get_state()
@@ -185,12 +183,17 @@ async def next_handler(call: types.CallbackQuery, callback_data: dict, state: FS
     application = data.get('application')
     action = callback_data.get('action')
     value = callback_data.get('value')
+    print("application", application)
     if action == 'next':
-        if not application or application.get('status') != "COURIER" or application.get('applicationId') != value:
-            await call.message.edit_text("Заявка не может быть продолжена.")
-            await state.finish()
-        elif application and application.get('status') == "COURIER" or application.get('applicationId') == value:
-            if current_state == ProcessApp.application.state and application.get('status') == "COURIER":
+        # if not application or application.get('status') != "COURIER" or application.get('applicationId') != value:
+        #     await call.message.edit_text("Заявка не может быть продолжена.")
+        #     await state.finish()
+        # elif application and application.get('status') == "COURIER" or application.get('applicationId') == value:
+        if application:
+            application = Application(data=application)
+            # if current_state == ProcessApp.application.state and application.get('status') == "COURIER":
+            print("current_state", current_state)
+            if current_state == ProcessApp.application.state:
                 message = await call.message.edit_text("Отправьте первое фото",
                                                        reply_markup=close_inline_user_keyboard(value))
                 await state.update_data(message_id=message.message_id)
@@ -198,20 +201,23 @@ async def next_handler(call: types.CallbackQuery, callback_data: dict, state: FS
             elif current_state == ProcessApp.confirm.state:
                 app = await App.query.where(
                     and_(App.app_name == data.get('deep_link'), App.app_finished == False)).gino.first()
-                resp = await update_application(app_id=data.get('deep_link'),
-                                                app_file_first=io.BytesIO(app.app_file_first),
-                                                app_file_second=io.BytesIO(app.app_file_second), app_name=app.app_name)
-                if resp.get('data'):
-                    apps = await MyApp.query.where(and_(MyApp.app_id == data.get('deep_link'), MyApp.finished == False)).gino.all()
-                    for app in apps:
-                        await app.update(finished=True).apply()
+                media_group = []
+                text = f"🆔 {application.data.application_id}\n"
+                text += f"📦 #id{app.app_owner}"
+                media_group.append(types.InputMediaPhoto(media=app.app_file_first_id,
+                                                         caption=text, parse_mode='Markdown'
+                                                         ))
+                media_group.append(types.InputMediaPhoto(media=app.app_file_second_id))
+                await call.answer()
+                mg = await bot.send_media_group(chat_id=config.ADMIN_GROUP,
+                                                media=media_group,
+                                                protect_content=True)
 
-                    await call.message.edit_text("*Заявка успешно завершена!*", reply_markup=None,
-                                                 parse_mode='Markdown')
-                else:
-                    await call.message.edit_text(resp.get('errorMessage'), reply_markup=None)
-                await state.finish()
+                await app.update(check_start_date=datetime.datetime.now()).apply()
+                await mg[0].reply(text="Подтвердите фото",
+                                  reply_markup=inline_approve_in_group_keyboard(app.app_id,
+                                                                                app.app_name,
+                                                                                mg[0].message_id))
     elif action == 'close':
         await call.message.delete()
-        # await call.message.edit_reply_markup(reply_markup=types.ReplyKeyboardRemove())
         await state.finish()

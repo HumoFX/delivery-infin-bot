@@ -3,6 +3,7 @@ import json
 from aiohttp import FormData
 from datetime import datetime
 from .constants import *
+from typing import List
 from .request import send_get_request, post_request, post_, post_data
 import textwrap
 
@@ -14,6 +15,48 @@ async def get_application(app_id):
     :return: ответ сервера
     """
     return await send_get_request(url=f'{baseUrl}/card-delivery/courier/info/{app_id}', lang='ru')
+
+
+async def get_application_list():
+    # return await send_get_request(url=f'{baseUrl}/card-delivery/courier/list', lang='ru')
+    resp = {'data':
+                [{'applicationId': 'DU002282',
+                  'cardType': 'UzCard',
+                  'phoneNumber': '998946263101',
+                  'fullName': 'OTABEKOVA DILDORA SHUXRATJON QIZI',
+                  'passport': 'AD0813017',
+                  'dateOfBirth': '1993-09-01',
+                  'region': 'Тошкент шахри',
+                  'city': 'Учтепа', 'district': 'Учтепа тумани',
+                  'street': 'Фазылтепа ',
+                  'house': '1',
+                  'flat': '1', 'comment': '1', 'status': 'REJECTED'},
+                 {'applicationId': 'DU002283',
+                  'cardType': 'Humo',
+                  'phoneNumber': '998946263101',
+                  'fullName': 'OTABEKOVA DILDORA SHUXRATJON QIZI',
+                  'passport': 'AD0813017',
+                  'dateOfBirth': '1993-09-01',
+                  'region': 'Тошкент шахри',
+                  'city': 'Учтепа', 'district': 'Учтепа тумани',
+                  'street': 'Фазылтепа ',
+                  'house': '1',
+                  'flat': '1', 'comment': '1', 'status': 'REJECTED'},
+                 {'applicationId': 'DU002284',
+                  'cardType': 'Visa',
+                  'phoneNumber': '998946263101',
+                  'fullName': 'OTABEKOVA DILDORA SHUXRATJON QIZI',
+                  'passport': 'AD0813017',
+                  'dateOfBirth': '1993-09-01',
+                  'region': 'Тошкент шахри',
+                  'city': 'Учтепа', 'district': 'Учтепа тумани',
+                  'street': 'Фазылтепа ',
+                  'house': '1',
+                  'flat': '1', 'comment': '1', 'status': 'REJECTED'}
+                 ],
+            'status': 0, 'time': 1658382222671}
+
+    return resp
 
 
 async def update_application(app_id, **kwargs):
@@ -156,4 +199,31 @@ class Application:
         text = f"""
         {self.data}
         """
+        return textwrap.dedent(text)
+
+    def __str_group__(self):
+        text = f"""
+        {self.data}
+        """
+        return textwrap.dedent(text)
+
+
+class ApplicationList:
+    def __init__(self, **kwargs):
+        self.data = List[Delivery(**kwargs.get('data'))]
+
+    def __str__(self):
+        text = ""
+        for i in self.data:
+            text += f"""
+            {i}\n
+            """
+        return textwrap.dedent(text)
+
+    def __str_group__(self):
+        text = ""
+        for i in self.data:
+            text += f"""
+                    {i}\n
+                    """
         return textwrap.dedent(text)
