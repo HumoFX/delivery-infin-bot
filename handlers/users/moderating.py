@@ -9,7 +9,7 @@ from aiogram.dispatcher import FSMContext
 from keyboards.inline.callback_builder import ApplicationCB
 from loader import dp, bot
 from utils.db_api.crud import get_user
-from utils.db_api.models import Users, Application as App
+from utils.db_api.models import Users, Application as App, MyApp
 from keyboards.default.user import contact
 from keyboards.inline.user import inline_user_keyboard, close_inline_user_keyboard, inline_end_keyboard, \
     inline_approve_in_group_keyboard, inline_approve_confirm_in_group_keyboard

@@ -60,3 +60,26 @@ class MyApp(db.Model):
     app_url = Column(String(128), nullable=True)
     finished = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, default=datetime.now())
+
+
+class Region(db.Model):
+    __tablename__ = 'region'
+    id = Column(Integer, primary_key=True)
+    name_ru = Column(String(255), nullable=False)
+    name_uz = Column(String(255), nullable=False)
+
+    @classmethod
+    def name(cls, lang):
+        return cls.name_ru if lang == 'ru' else cls.name_uz
+
+
+class District(db.Model):
+    __tablename__ = 'district'
+    id = Column(Integer, primary_key=True)
+    region_id = Column(ForeignKey("region.id", ondelete='CASCADE'), nullable=False)
+    name_ru = Column(String(100))
+    name_uz = Column(String(100))
+
+    @classmethod
+    def name(cls, lang):
+        return cls.name_ru if lang == 'ru' else cls.name_uz

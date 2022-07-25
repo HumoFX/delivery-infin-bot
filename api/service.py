@@ -1,9 +1,7 @@
 import json
 
-from aiohttp import FormData
 from datetime import datetime
 from .constants import *
-from typing import List
 from .request import send_get_request, post_request, post_, post_data
 import textwrap
 
@@ -68,8 +66,8 @@ async def update_application(app_id, **kwargs):
     """
     # hea
     headers = image_headers
-    # token = "eyJraWQiOiIvcHJpdmF0ZWtleS5wZW0iLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJpbmZpbmJhbmsiLCJqdGkiOiJpbmZpbjdiNTM1OGYwLTBkNjMtNGVhMS1hOTM2LThmYjZiNTZkYzlkZiIsInN1YiI6IjE5OTgyMiIsImN1c3RvbWVySUQiOiIxOTk4MjIiLCJncm91cHMiOlsiTk9OX0NMSUVOVCJdLCJhdWQiOiJ1c2luZy1qd3QiLCJleHAiOjE2NTQxMDY3MzQsImlhdCI6MTY0ODEwNjczNCwiYXV0aF90aW1lIjoxNjQ4MTA2NzM0fQ.pfiqQy2BfOnzFdWbEveSC9W49khMk8jRRrgUjiv8ddwrfHtOBDXuCavo-ulvlM2iRBYBO-AchFRx8LbmEsFJSu3stq7ERgyKP13y3RIwJ1Q1rr-BYYuz2295M547bpq2_EAnMRQM0XNNPc_EmNJKJG6kOhPLBuNVdUO69ElB0OhU9UhjyinMrWFzrv7j3lqF3D0KtE8jTg4-ViT0ytDs4_vaz2vJ2KwMULO4_LJXDgQP7dVfZJ2su8sjqifQE6pV4wYsKhEPdEMA25mjWpw8wtGDYDIWC8YwIrrPDd6wAJmol-4ciResluVh0UxesKOPZrQ4ttGMv6Fb3X8zYkKLAg"
-    # headers['Authorization'] = f'Bearer {token}'
+    # token = "eyJraWQiOiIvcHJpdmF0ZWtleS5wZW0iLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9
+    # .eyJpc3MiOiJpbmZpbmJhbmsiLCJqdGkiOiJpbmZpbjdiNTM1OGYwLTBkNjMtNGVhMS1hOTM2LThmYjZiNTZkYzlkZiIsInN1YiI6IjE5OTgyMiIsImN1c3RvbWVySUQiOiIxOTk4MjIiLCJncm91cHMiOlsiTk9OX0NMSUVOVCJdLCJhdWQiOiJ1c2luZy1qd3QiLCJleHAiOjE2NTQxMDY3MzQsImlhdCI6MTY0ODEwNjczNCwiYXV0aF90aW1lIjoxNjQ4MTA2NzM0fQ.pfiqQy2BfOnzFdWbEveSC9W49khMk8jRRrgUjiv8ddwrfHtOBDXuCavo-ulvlM2iRBYBO-AchFRx8LbmEsFJSu3stq7ERgyKP13y3RIwJ1Q1rr-BYYuz2295M547bpq2_EAnMRQM0XNNPc_EmNJKJG6kOhPLBuNVdUO69ElB0OhU9UhjyinMrWFzrv7j3lqF3D0KtE8jTg4-ViT0ytDs4_vaz2vJ2KwMULO4_LJXDgQP7dVfZJ2su8sjqifQE6pV4wYsKhEPdEMA25mjWpw8wtGDYDIWC8YwIrrPDd6wAJmol-4ciResluVh0UxesKOPZrQ4ttGMv6Fb3X8zYkKLAg" headers['Authorization'] = f'Bearer {token}'
     return await post_data(url=f'{baseUrl}/card-delivery/application/save/photos/{app_id}', headers=headers, **kwargs)
 
 
@@ -190,6 +188,32 @@ class Delivery:
         """
 
 
+class DeliveryShort:
+    def __init__(self, **kwargs):
+        self.application_id = kwargs.get('applicationId', '')
+        self.card_type = kwargs.get('cardType', '')
+        self.phone_number = kwargs.get('phoneNumber', '')
+        self.full_name = kwargs.get('fullName', '')
+        self.passport = kwargs.get('passport', '')
+        self.date_of_birth = kwargs.get('dateOfBirth', '')
+        self.region = kwargs.get('region', '')
+        self.city = kwargs.get('city', '')
+        self.district = kwargs.get('district', '')
+        self.street = kwargs.get('street', '')
+        self.house = kwargs.get('house', '')
+        self.flat = kwargs.get('flat', '')
+        self.comment = kwargs.get('comment', '')
+        self.status = kwargs.get('status', '')
+
+    def __str__(self):
+        return f"""
+        🆔 /{self.application_id} - {STATUS[self.status]}
+        💳 {self.card_type}
+        📦 {self.region}, {self.city}, {self.district}, ул. {self.street}, д.{self.house} кв.{self.flat}
+        📲 Тел. {self.phone_number}
+        """
+
+
 # create class Application with kwargs of id, data fields
 class Application:
     def __init__(self, **kwargs):
@@ -210,20 +234,16 @@ class Application:
 
 class ApplicationList:
     def __init__(self, **kwargs):
-        self.data = List[Delivery(**kwargs.get('data'))]
+        self.data = [DeliveryShort(**x) for x in kwargs.get('data')]
 
     def __str__(self):
         text = ""
         for i in self.data:
-            text += f"""
-            {i}\n
-            """
+            text += f"{i}"
         return textwrap.dedent(text)
 
     def __str_group__(self):
         text = ""
         for i in self.data:
-            text += f"""
-                    {i}\n
-                    """
+            text += f"{i}"
         return textwrap.dedent(text)

@@ -1,6 +1,7 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 
 from keyboards.inline.callback_builder import ApplicationCB
+from utils.constants import PAGINATION
 
 
 def inline_user_keyboard(app_id):
@@ -76,3 +77,68 @@ def inline_confirm_keyboard(app_id):
                                       callback_data=ApplicationCB.action.new(action="edit_second_photo",
                                                                              value=app_id)))
     return keyboard
+
+
+def pagination_inline_button(count, offset, limit, page):
+    markup = InlineKeyboardMarkup(row_width=2)
+    if offset > 0:
+        markup.insert(InlineKeyboardButton(text=PAGINATION['prev'],
+                                           callback_data=ApplicationCB.pagination.new(action="prev", page=page,
+                                                                                      offset=offset, limit=limit,
+                                                                                      count=count)))
+    if count > offset + limit:
+        markup.insert(InlineKeyboardButton(text=PAGINATION['next'],
+                                           callback_data=ApplicationCB.pagination.new(action="next", page=page,
+                                                                                      offset=offset, limit=limit,
+                                                                                      count=count)))
+    return markup
+
+
+def inline_choose_region(self, region):
+    pass
+
+
+def apps_inline_button(app_list, count, offset, limit, page):
+    markup = pagination_inline_button(count, offset, limit, page)
+    max_limit = offset + limit if offset + limit <= count else count
+    markup.row(InlineKeyboardButton(text='Фильтрация', callback_data=ApplicationCB.app_action.new(action='filter',
+                                                                                                  value='apps')),
+               InlineKeyboardButton(text='Сортировка', callback_data=ApplicationCB.app_action.new(action='sort',
+                                                                                                  value='apps')))
+    markup.row(InlineKeyboardButton(text='Выбрать', callback_data=ApplicationCB.app_action.new(action='select',
+                                                                                               value='apps')))
+    return markup
+
+
+def app_select_inline_button(app_list, selected_list, count, offset, limit, page):
+    markup = InlineKeyboardMarkup(row_width=2)
+    markup.row(InlineKeyboardButton(text='🔙Назад',
+                                    callback_data=ApplicationCB.app_action.new(action='back',
+                                                                               value='apps')),
+               InlineKeyboardButton(text='Продолжить🔜',
+                                    callback_data=ApplicationCB.app_action.new(action='continue',
+                                                                               value='apps'))
+               )
+    max_limit = offset + limit if offset + limit <= count else count
+
+    for app in app_list[offset:max_limit]:
+        if app.application_id in selected_list:
+            markup.insert(InlineKeyboardButton(text=f"☑️{app.application_id}",
+                                               callback_data=ApplicationCB.app_action.new(action='choose',
+                                                                                          value=app.application_id)))
+        else:
+            markup.insert(InlineKeyboardButton(text=app.application_id,
+                                               callback_data=ApplicationCB.app_action.new(action='choose',
+                                                                                          value=app.application_id)))
+    if offset > 0:
+        markup.insert(InlineKeyboardButton(text=PAGINATION['prev'],
+                                           callback_data=ApplicationCB.pagination.new(action="prev", page=page,
+                                                                                      offset=offset, limit=limit,
+                                                                                      count=count)))
+    if count > offset + limit:
+        markup.insert(InlineKeyboardButton(text=PAGINATION['next'],
+                                           callback_data=ApplicationCB.pagination.new(action="next", page=page,
+                                                                                      offset=offset, limit=limit,
+                                                                                      count=count)))
+
+    return markup

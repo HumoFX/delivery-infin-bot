@@ -13,7 +13,7 @@ from utils.set_bot_commands import set_default_commands
 
 async def on_startup(dispatcher):
     # Устанавливаем дефолтные команды
-    await set_default_commands(dispatcher)
+    # await set_default_commands(dispatcher)
     await create_db()
 
     # Уведомляет про запуск

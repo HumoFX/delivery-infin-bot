@@ -7,7 +7,7 @@ env.read_env()
 BOT_TOKEN = env.str("BOT_TOKEN")  # Забираем значение типа str
 ADMINS = env.int("ADMIN_ID")  # Тут у нас будет список из админов
 # IP = env.str("ip")  # Тоже str, но для айпи адреса хоста
-LOGS_CHANNEL = -1001644884708
+LOGS_CHANNEL = -1001530214778
 ADMIN_GROUP = -1001530214778
 
 POSTGRES_USER = env.str("POSTGRES_USER")
