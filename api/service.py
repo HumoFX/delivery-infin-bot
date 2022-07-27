@@ -36,7 +36,7 @@ async def get_application_list():
                   'passport': 'AD0813017',
                   'dateOfBirth': '1993-09-01',
                   'region': 'Тошкент шахри',
-                  'city': 'Учтепа', 'district': 'Учтепа тумани',
+                  'city': 'Бектемир', 'district': 'Бектемир тумани',
                   'street': 'Фазылтепа ',
                   'house': '1',
                   'flat': '1', 'comment': '1', 'status': 'REJECTED'},
@@ -213,6 +213,25 @@ class DeliveryShort:
         📲 Тел. {self.phone_number}
         """
 
+    def to_dict(self):
+        result: dict = {
+            "applicationId": self.application_id,
+            "cardType": self.card_type,
+            "phoneNumber": self.phone_number,
+            "fullName": self.full_name,
+            "passport": self.passport,
+            "dateOfBirth": self.date_of_birth,
+            "region": self.region,
+            "city": self.city,
+            "district": self.district,
+            "street": self.street,
+            "house": self.house,
+            "flat": self.flat,
+            "comment": self.comment,
+            "status": self.status,
+        }
+        return result
+
 
 # create class Application with kwargs of id, data fields
 class Application:
@@ -247,3 +266,7 @@ class ApplicationList:
         for i in self.data:
             text += f"{i}"
         return textwrap.dedent(text)
+
+    def to_dict(self):
+        result: dict = {'data': self.data}
+        return result

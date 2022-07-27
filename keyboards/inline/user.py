@@ -142,3 +142,37 @@ def app_select_inline_button(app_list, selected_list, count, offset, limit, page
                                                                                       count=count)))
 
     return markup
+
+
+def region_list_inline(region_list):
+    markup = InlineKeyboardMarkup(row_width=2)
+    markup.row(InlineKeyboardButton(text='🔙Назад',
+                                    callback_data=ApplicationCB.app_action.new(action='back',
+                                                                               value='apps')))
+    for region in region_list:
+        markup.add(InlineKeyboardButton(text=region,
+                                        callback_data=ApplicationCB.app_action.new(action="region_choose",
+                                                                                   value=region)))
+    return markup
+
+
+def district_list_inline(district_list, selected_district_list):
+    markup = InlineKeyboardMarkup(row_width=2)
+    markup.row(InlineKeyboardButton(text='🔙Назад',
+                                    callback_data=ApplicationCB.app_action.new(action='back',
+                                                                               value='region')),
+               InlineKeyboardButton(text='Продолжить🔜',
+                                    callback_data=ApplicationCB.app_action.new(action='continue',
+                                                                               value='district'))
+               )
+    for district in district_list:
+        if district.id in selected_district_list:
+            markup.insert(InlineKeyboardButton(text=f"☑️{district.name_uz}",
+                                               callback_data=ApplicationCB.app_action.new(action="district_choose",
+                                                                                          value=district.id)))
+        else:
+            markup.insert(InlineKeyboardButton(text=district.name_uz,
+                                               callback_data=ApplicationCB.app_action.new(action="district_choose",
+                                                                                          value=district.id)))
+
+    return markup
