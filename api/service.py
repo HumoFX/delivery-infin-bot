@@ -1,6 +1,8 @@
 import json
 
 from datetime import datetime
+
+from utils.db_api.models import Region, District
 from .constants import *
 from .request import send_get_request, post_request, post_, post_data
 import textwrap
@@ -187,6 +189,34 @@ class Delivery:
         *Комментарий:* {self.comment}
         """
 
+    async def new_str(self):
+        region = await Region.query.where(Region.id == int(self.region)).gino.first()
+        district = await District.query.where(District.id == int(self.district)).gino.first()
+        region_name = self.region
+        district_name = self.district
+        if region:
+            region_name = region.name_ru
+        if district:
+            district_name = district.name_ru
+        return f"""
+        *Номер заявки:* {self.application_id}
+        *Тип карты:* {self.card_type}
+        *Статус:* {STATUS[self.status]}
+
+        *Номер телефона:* {self.phone_number}
+        *ФИО:* {self.full_name}
+        *Паспорт:* {self.passport}
+        *Дата рождения:* {self.date_of_birth}
+        *Регион:* {region_name}
+        *Город:* {self.city}
+        *Район:* {district_name}
+        *Улица:* {self.street}
+        *Дом:* {self.house}
+        *Квартира:* {self.flat}
+
+        *Комментарий:* {self.comment}
+        """
+
 
 class DeliveryShort:
     def __init__(self, **kwargs):
@@ -212,6 +242,24 @@ class DeliveryShort:
         📦 {self.region}, {self.city}, {self.district}, ул. {self.street}, д.{self.house} кв.{self.flat}
         📲 Тел. {self.phone_number}
         """
+
+    async def new_str(self):
+        region_name = self.region
+        district_name = self.district
+        if self.region.isdigit():
+            region = await Region.query.where(Region.id == int(self.region)).gino.first()
+            if region:
+                region_name = region.name_ru
+        if self.district.isdigit():
+            district = await District.query.where(District.id == int(self.district)).gino.first()
+            if district:
+                district_name = district.name_ru
+        return f"""
+                🆔 /{self.application_id} - {STATUS[self.status]}
+                💳 {self.card_type}
+                📦 {region_name}, {self.city}, {district_name}, ул. {self.street}, д.{self.house} кв.{self.flat}
+                📲 Тел. {self.phone_number}
+                """
 
     def to_dict(self):
         result: dict = {
@@ -250,6 +298,12 @@ class Application:
         """
         return textwrap.dedent(text)
 
+    async def new_str(self):
+        text = f"""
+                {await self.data.new_str()}
+                """
+        return textwrap.dedent(text)
+
 
 class ApplicationList:
     def __init__(self, **kwargs):
@@ -265,6 +319,12 @@ class ApplicationList:
         text = ""
         for i in self.data:
             text += f"{i}"
+        return textwrap.dedent(text)
+
+    async def new_str(self):
+        text = ""
+        for i in self.data:
+            text += f"{await i.new_str()}"
         return textwrap.dedent(text)
 
     def to_dict(self):

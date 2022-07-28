@@ -53,7 +53,7 @@ async def app_list_handler(message: types.Message, state: FSMContext):
         await state.update_data({"app_list": data, "offset": offset, "page": page, "limit": limit, "count": count,
                                  "region_list": list(region_list), "district_list": list(district_list)})
 
-        await message.answer(app_list.__str__(), parse_mode='Markdown', reply_markup=apps_inline_button(app_list.data,
+        await message.answer(await app_list.new_str(), parse_mode='Markdown', reply_markup=apps_inline_button(app_list.data,
                                                                                                         count,
                                                                                                         offset, limit,
                                                                                                         page))
@@ -79,6 +79,7 @@ async def app_action_handler(call: types.CallbackQuery, callback_data: dict, sta
     action = callback_data.get('action')
     region_list = data.get('region_list', [])
     district_list = data.get('district_list', [])
+    filtered_apps = data.get('filtered_apps', [])
     chosen_region = data.get('chosen_region', None)
     chosen_district = data.get('chosen_district', None)
     value = callback_data.get('value')
@@ -89,15 +90,21 @@ async def app_action_handler(call: types.CallbackQuery, callback_data: dict, sta
     elif action == 'sort':
         pass
     elif action == 'select':
+        if not filtered_apps:
+            text = f"Результатов {len(filtered_apps)}. Поменяйте настройки фильтрации"
+        else:
+            data = {"data": filtered_apps}
+            app_list = ApplicationList(**data)
+            text = await app_list.new_str()
         selected_list = []
-        await call.message.edit_text(app_list.__str__(), parse_mode='Markdown',
+        await call.message.edit_text(text, parse_mode='Markdown',
                                      reply_markup=app_select_inline_button(app_list.data,
                                                                            selected_list,
                                                                            count,
                                                                            offset, limit,
                                                                            page))
     elif action == 'back':
-        await call.message.edit_text(app_list.__str__(), parse_mode='Markdown',
+        await call.message.edit_text(await app_list.new_str(), parse_mode='Markdown',
                                      reply_markup=apps_inline_button(app_list.data,
                                                                      count,
                                                                      offset, limit,
@@ -113,7 +120,7 @@ async def app_action_handler(call: types.CallbackQuery, callback_data: dict, sta
         if not app_result:
             text = f"Результатов {len(app_result)}. Поменяйте настройки фильтрации"
         else:
-            text = ApplicationList(**data).__str__()
+            text = await ApplicationList(**data).new_str()
         await call.message.edit_text(text, parse_mode='Markdown',
                                      reply_markup=apps_inline_button(app_result,
                                                                      count,
@@ -121,12 +128,16 @@ async def app_action_handler(call: types.CallbackQuery, callback_data: dict, sta
                                                                      page))
 
     elif action == 'choose':
+        if filtered_apps:
+            data = {"data": filtered_apps}
+            app_list = ApplicationList(**data)
         if value not in selected_list:
             selected_list.append(value)
         else:
             selected_list.remove(value)
+        print("selected_list", selected_list)
         await state.update_data({"selected_list": selected_list})
-        await call.message.edit_text(app_list.__str__(), parse_mode='Markdown',
+        await call.message.edit_text(await app_list.new_str(), parse_mode='Markdown',
                                      reply_markup=app_select_inline_button(app_list.data,
                                                                            selected_list,
                                                                            count,
@@ -160,3 +171,5 @@ async def app_action_handler(call: types.CallbackQuery, callback_data: dict, sta
         text = f"Выбрано {len(app_result)} заявок.\nВыберите район"
         await call.message.edit_text(text, parse_mode='Markdown',
                                      reply_markup=district_list_inline(district_list, selected_district_list))
+
+

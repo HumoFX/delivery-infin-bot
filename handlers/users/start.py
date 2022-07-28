@@ -46,12 +46,12 @@ async def bot_start(message: types.Message, state: FSMContext):
                 application = Application(data=resp.get('data'))
                 await state.update_data(data=data)
                 if application.data.status == "COURIER":
-                    await message.answer(application.__str__(), reply_markup=inline_user_keyboard(deep_link),
+                    await message.answer(await application.new_str(), reply_markup=inline_user_keyboard(deep_link),
                                          parse_mode='Markdown')
                     await ProcessApp.application.set()
 
                 else:
-                    await message.answer(application.__str__(), reply_markup=close_inline_user_keyboard(deep_link),
+                    await message.answer(await application.new_str(), reply_markup=close_inline_user_keyboard(deep_link),
                                          parse_mode='Markdown')
             else:
                 await message.answer("Заявка не найдена")
@@ -78,10 +78,10 @@ async def contact_handler(message: types.Message, state: FSMContext):
             application = Application(data=resp.get('data'))
             await state.update_data(data=data)
             if application.data.status == "COURIER":
-                await message.answer(application.__str__(), reply_markup=inline_user_keyboard(deep_link),
+                await message.answer(await application.new_str(), reply_markup=inline_user_keyboard(deep_link),
                                      parse_mode='Markdown')
             else:
-                await message.answer(application.__str__(), reply_markup=close_inline_user_keyboard(deep_link),
+                await message.answer(await application.new_str(), reply_markup=close_inline_user_keyboard(deep_link),
                                      parse_mode='Markdown')
             await state.finish()
             await ProcessApp.application.set()
@@ -106,12 +106,12 @@ async def text_handler(message: types.Message, state: FSMContext):
                 application = Application(data=resp.get('data'))
                 await state.update_data(data=data)
                 if application.data.status == "COURIER":
-                    await message.answer(application.__str__(), reply_markup=inline_user_keyboard(deep_link),
+                    await message.answer(await application.new_str(), reply_markup=inline_user_keyboard(deep_link),
                                          parse_mode='Markdown')
                 else:
-                    # await message.answer(application.__str__(), reply_markup=close_inline_user_keyboard(deep_link),
+                    # await message.answer(await application.new_str(), reply_markup=close_inline_user_keyboard(deep_link),
                     #                      parse_mode='Markdown')
-                    await message.answer(application.__str__(), reply_markup=inline_user_keyboard(deep_link),
+                    await message.answer(await application.new_str(), reply_markup=inline_user_keyboard(deep_link),
                                          parse_mode='Markdown')
                 # await state.finish()
                 await ProcessApp.application.set()
